@@ -8,5 +8,12 @@
             defaultName="ClusterCalculation">
       </tool>
    </extension>
+   <extension
+         point="org.eclipse.epsilon.common.dt.tool">
+      <tool
+            class="clusterer.MSTCluesterCalculation"
+            defaultName="CluesterCalculation">
+      </tool>
+   </extension>
 
 </plugin>
