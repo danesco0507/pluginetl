@@ -34,6 +34,7 @@ public class WeightedGraph<T> {
     	if (k < edgeList.size()){
     		while(k>0){
     			removeMostWeightedEdge();
+    			k--;
     		}
     	}
     	else{
@@ -50,6 +51,7 @@ public class WeightedGraph<T> {
     			e = ej;
     		}
     	}
+    	System.out.println(e.cost);
     	edgeList.remove(e);
     }
 
@@ -100,6 +102,7 @@ public class WeightedGraph<T> {
     // check if is graph is connected
     public boolean DepthFirstSearch()
     {
+    	setAllUnvisited();
         if (vertexList.isEmpty()) return false;
 
         // get first node
@@ -110,6 +113,7 @@ public class WeightedGraph<T> {
         DepthFirstSearch(root);
         return isConnected();
     }
+    
 
     // recurse through nodes
     private void DepthFirstSearch(Vertex v)
@@ -127,7 +131,7 @@ public class WeightedGraph<T> {
         v.setState(State.COMPLETE);
     }
 
-    // test if DFS returned a connected graph
+     //test if DFS returned a connected graph
     public boolean isConnected()
     {
         for (Vertex each : vertexList)
@@ -263,51 +267,72 @@ public class WeightedGraph<T> {
     
     public Set<WeightedGraph<T>> primSubGraphs(){
     	
+    	setAllUnvisited();
+    	
     	Set<WeightedGraph<T>> primGraphs = new HashSet<WeightedGraph<T>>();
-    	ArrayList<Vertex> vs = this.vertexList;
+    	ArrayList<Vertex> unvisited = this.vertexList;
+    	ArrayList<Vertex> visited = new ArrayList<Vertex>();
     	ArrayList<Edge> es = this.edgeList;
-    	while(!vs.isEmpty()){
-    		Vertex initial = vs.get(0);
+    	while(!unvisited.isEmpty()){
+    		Vertex initial = unvisited.get(0);
+    		visited.add(initial);
+    		unvisited.remove(initial);
+    		initial.state= State.VISITED;
+    		
     		WeightedGraph<T> wg = new WeightedGraph<T>();
     		wg.addVertex(initial.getValue());
-    		vs.remove(initial);
-    		Edge e = getLeastCostEdge(es, initial);
-    		while(e!=null){
+    		
+    		ArrayList<Edge> visitable = getVisitableEdges(visited);
+    		while(!visitable.isEmpty()){
+    			Edge e = getLeastCostEdge(visitable);
     			wg.addEdge(e.getX().getValue(), e.getY().getValue(), e.getCost());
-    			es.remove(e);
-    			if( e.getX().equals(initial)){
-    				initial = e.getY();
-    				vs.remove(e.getY());
+    			if(unvisited.contains(e.getX())){
+    				visited.add(e.getX());
+    				unvisited.remove(e.getX());
+    				e.getX().setState(State.VISITED);
     			}
     			else{
-					initial = e.getX();
-					vs.remove(e.getX());
-				}
-    			e = getLeastCostEdge(es, initial);
+    				visited.add(e.getY());
+    				unvisited.remove(e.getY());
+    				e.getY().setState(State.VISITED);
+    			}
+    			visitable= getVisitableEdges(visited);
     		}
     		primGraphs.add(wg);
+    		
     	}
 		return primGraphs;
     }
     
-    public ArrayList<Edge> getVertexEdges(ArrayList<Edge> edges, Vertex v){
+    public ArrayList<Edge> getVisitableEdges(ArrayList<Vertex> visited){
+    	ArrayList<Edge> visitable = new ArrayList<Edge>();
+    	for(Vertex v :visited ){
+    		visitable.addAll(getEdgesVisitable(v));
+    	}
+    	return visitable;
+    }
+    
+    public ArrayList<Edge> getEdgesVisitable(Vertex v){
     	ArrayList<Edge> es = new ArrayList<Edge>();
-    	for(Edge e:edges){
-    		if(e.getX().equals(v) || e.getY().equals(v)){
-    			es.add(e);
+    	for(Edge e:edgeList){
+    		if(e.getX().equals(v)){
+    			if(e.getY().getState().equals(State.UNVISITED)){
+    				es.add(e);
+    			}
     		}
+    		else if (e.getY().equals(v)) {
+    			if(e.getX().getState().equals(State.UNVISITED)){
+    				es.add(e);
+    			}
+			}
     	}
     	return es;
     }
     
-    public Edge getLeastCostEdge(ArrayList<Edge> edges, Vertex v ){
-    	
-    	ArrayList<Edge> ves = getVertexEdges(edges, v);
-    	
-    	if (ves.isEmpty()) return null;
-    	
-    	Edge e = ves.get(0);
-    	for(Edge ej:ves){
+    public Edge getLeastCostEdge(ArrayList<Edge> edges ){
+
+    	Edge e = edges.get(0);
+    	for(Edge ej:edges){
     		if(ej.getCost()<e.getCost()){
     			e = ej;
     		}
@@ -315,4 +340,20 @@ public class WeightedGraph<T> {
     	
     	return e;
     }
+    
+    private void setAllUnvisited(){
+    	for (Vertex v : vertexList){
+    		v.setState(State.UNVISITED);
+    	}
+    }
+
+	public ArrayList<Vertex> getVertexList() {
+		return vertexList;
+	}
+
+	public ArrayList<Edge> getEdgeList() {
+		return edgeList;
+	}
+    
+    
 }
