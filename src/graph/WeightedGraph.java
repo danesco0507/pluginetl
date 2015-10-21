@@ -38,9 +38,10 @@ public class WeightedGraph<T> {
     		}
     	}
     	else{
-    		for(Edge e: edgeList){
+    		edgeList.clear();
+    		/*for(Edge e: edgeList){
     			edgeList.remove(e);
-    		}
+    		}*/
     	}
     }
     
