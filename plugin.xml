@@ -15,5 +15,12 @@
             defaultName="CluesterCalculation">
       </tool>
    </extension>
+   <extension
+         point="org.eclipse.epsilon.common.dt.tool">
+      <tool
+            class="clusterer.EJBClusterer"
+            defaultName="EJBClusterer">
+      </tool>
+   </extension>
 
 </plugin>
