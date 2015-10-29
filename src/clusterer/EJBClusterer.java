@@ -39,38 +39,44 @@ public class EJBClusterer {
 		
 		Set<CodeItem> allNodes = new HashSet<CodeItem>(graph.getVertices());
 		
-		Set<Set<CodeItem>> allht = constructHeritageTree(ejbs);
-		System.out.println("------------------------------------------------------------");
-		System.out.println(allht);
-		System.out.println("------------------------------------------------------------");
-		for (Set<CodeItem> ht : allht){
+		Set<Set<CodeItem>> allEjbHt = constructHeritageTree(ejbs);
+		Set<Set<CodeItem>> allEntityHt = constructHeritageTree(entities);
+		
+		for (Set<CodeItem> ejbHt : allEjbHt)
+		{
 			Set<CodeItem> cluster = new HashSet<CodeItem>();
-			cluster.addAll(ht);
-			
-			for(CodeItem ci : ht){
-				for(CodeItem entity : entities)
+			cluster.addAll(ejbHt);
+			//ESTO PUEDE SER MUY LENTO
+			for(CodeItem ejbHtElem : ejbHt)
+			{		
+				for(Set<CodeItem> entityHt : allEntityHt)
 				{
-					for(ClassLevelRelation clr : sp.getPath(ci, entity)){
-						cluster.add(clr.getFrom());
-						cluster.add(clr.getTo());
+					for(CodeItem entHtElem : entityHt)
+					{
+						if(!sp.getPath(ejbHtElem, entHtElem).isEmpty()){
+							cluster.addAll(entityHt);
+							for(ClassLevelRelation clr : sp.getPath(ejbHtElem, entHtElem)){
+								cluster.add(clr.getFrom());
+								cluster.add(clr.getTo());
+							}
+						}
 					}
 				}
 			}
-			
 			firtsclusters.add(cluster);
 		}
 		
-		for(Set<CodeItem> ht : allht){
+		for(Set<CodeItem> ht : allEjbHt){
 			allNodes.removeAll(ht);
 		}
 		
 		Set<Set<CodeItem>> lastclusters = new HashSet<Set<CodeItem>>();
 		
-		for (Set<CodeItem> ht : firtsclusters){
+		for (Set<CodeItem> subCluster : firtsclusters){
 			Set<CodeItem> cluster = new HashSet<CodeItem>();
-			cluster.addAll(ht);
+			cluster.addAll(subCluster);
 			
-			for(CodeItem ci : ht){
+			for(CodeItem ci : subCluster){
 				for(CodeItem item : allNodes)
 				{
 					for(ClassLevelRelation clr : sp.getPath(ci, item)){
@@ -96,9 +102,6 @@ public class EJBClusterer {
 		for(CodeItem ejb : ejbs){
 			Set<CodeItem> ht = new HashSet<CodeItem>();
 			ht = getHeritageTree(ejb);
-			System.out.println("-----------------heritage tree-------------------------------------------");
-			System.out.println(ht);
-			System.out.println("-----------------heritage tree-------------------------------------------");
 			heritageTrees.add(ht);
 		}
 		return heritageTrees;
@@ -109,10 +112,6 @@ public class EJBClusterer {
 		Collection<ClassLevelRelation> allclr = graph.getOutEdges(item);
 		
 		for(ClassLevelRelation clr: allclr){
-			System.out.println("-----------------is impl-------------------------------------------");
-			System.out.println(clr);
-			System.out.println(isExtensionOrImplementation(clr));
-			System.out.println("-----------------is impl-------------------------------------------");
 			if(isExtensionOrImplementation(clr)){
 				set.add(clr.getFrom());
 				set.addAll(getHeritageTree(clr.getTo()));
