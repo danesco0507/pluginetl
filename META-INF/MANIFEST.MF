@@ -8,8 +8,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.core.runtime,
  org.eclipse.epsilon.common.dt;bundle-version="1.2.0",
  org.junit,
- KDM2Model;bundle-version="1.0.0",
- VisualizacionMetricas.model;bundle-version="1.0.0"
+ KDM2Model;bundle-version="1.0.0"
 Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Bundle-ActivationPolicy: lazy
 Bundle-ClassPath: libraries/collections-generic-4.01.jar,

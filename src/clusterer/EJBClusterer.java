@@ -2,23 +2,14 @@ package clusterer;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import subkdm.kdmObjects.AbstractCodeElement;
+import subkdm.kdmObjects.Cluster;
 import subkdm.kdmObjects.CodeItem;
 import subkdm.kdmObjects.KdmObjectsFactory;
-import subkdm.kdmObjects.Module;
-import subkdm.kdmObjects.Package;
 import subkdm.kdmRelations.ClassLevelRelation;
 import subkdm.kdmRelations.TypeRelation;
-import visualizacionMetricas3.Elemento;
-import visualizacionMetricas3.representacion.Clase;
-import visualizacionMetricas3.representacion.Cluster;
-import visualizacionMetricas3.representacion.Paquete;
-import visualizacionMetricas3.representacion.RepresentacionFactory;
 import edu.uci.ics.jung.algorithms.shortestpath.DijkstraShortestPath;
 import edu.uci.ics.jung.graph.DirectedGraph;
 import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
@@ -26,11 +17,11 @@ import edu.uci.ics.jung.graph.DirectedSparseMultigraph;
 public class EJBClusterer {
 	
 	DirectedGraph<CodeItem, ClassLevelRelation> graph;
-	RepresentacionFactory factory;
+	KdmObjectsFactory factory;
 	
 	public EJBClusterer(){
 		graph = new DirectedSparseMultigraph<CodeItem, ClassLevelRelation>();
-		factory = RepresentacionFactory.eINSTANCE;
+		factory = KdmObjectsFactory.eINSTANCE;
 	}
 	
 	public void constructGraph(Set<CodeItem> classes, Set<ClassLevelRelation> relations){
@@ -44,18 +35,6 @@ public class EJBClusterer {
 		}
 	}
 	
-	public Paquete getOrCreatePackage(Cluster cluster, CodeItem codeItem){
-		Package pkg = (Package) codeItem.eContainer();
-		for(Elemento hijo : cluster.getHijos()){
-			if(hijo.getName().equals(pkg.getName())){
-				return (Paquete)hijo;
-			}
-		}
-		Paquete pq = factory.createPaquete();
-		pq.setName(pkg.getName());
-		
-		return pq;
-	}
 	
 	public Set<Cluster> makeCluster(Set<CodeItem> ejbs, Set<CodeItem> entities){
 		
@@ -111,13 +90,7 @@ public class EJBClusterer {
 			
 			elementos.addAll(extras);
 			
-			for(CodeItem elem : elementos){
-				Paquete pk = getOrCreatePackage(mod, elem);
-				Clase cl = factory.createClase();
-				cl.setName(elem.getName());
-				pk.getHijos().add(cl);
-				mod.getHijos().add(pk);
-			}
+			mod.getCodeElement().addAll(elementos);
 			firstclusters.add(mod);
 		}
 		
